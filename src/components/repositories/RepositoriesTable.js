@@ -6,16 +6,19 @@ import TableHeader from "../TableHeader";
 import TableBody from "../TableBody";
 import TableRow from "../TableRow";
 
-function RepositoryTable({ repositories }) {
+function RepositoriesTable({ repositories, onRepositoryClick }) {
 
   function renderRepositories() {
     return repositories.map(repo => {
-      return (<TableRow key={repo.id}>
-        <td>{repo.name}</td>
-        <td>{repo.hp}</td>
-        <td>{repo.armor}</td>
-        <td>{repo.toHit}</td>
-        <td>{repo.damage.amount} 🎲  {repo.damage.die}</td>
+      return (<TableRow key={`repo-${repo.id}`}>
+        <td>
+          <span onClick={() => onRepositoryClick()}>{repo.name}</span>
+        </td>
+        <td>{repo.language}</td>
+        <td>{repo.description}</td>
+        <td>{repo.created_at}</td>
+        <td>{repo.updated_at}</td>
+        <td><a href={repo.html_url}>{repo.html_url}</a></td>
         <td>
           <S.ButtonWrapper>
           </S.ButtonWrapper>
@@ -29,12 +32,11 @@ function RepositoryTable({ repositories }) {
       <TableHeader>
         <tr>
           <td>Name</td>
-          <td>HP</td>
-          <td>Armor</td>
-          <td>toHit</td>
-          <td>Damage</td>
-          <td>Bonus Damage</td>
-          <td>Team</td>
+          <td>Language</td>
+          <td>Description</td>
+          <td>Created At</td>
+          <td>Updated At</td>
+          <td>Link</td>
           <td></td>
         </tr>
       </TableHeader>
@@ -45,7 +47,7 @@ function RepositoryTable({ repositories }) {
   );
 }
 
-export default RepositoryTable;
+export default RepositoriesTable;
 
 const S = {};
 S.ButtonWrapper = styled.div`
