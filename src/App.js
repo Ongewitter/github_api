@@ -1,16 +1,26 @@
-import logo from './logo.svg';
 import './App.css';
 import { useState } from 'react';
-import InputLabel from './components/InputLabel';
-import TextInput from './components/TextInput';
+import styled from 'styled-components';
+
+import { createTheme, ThemeProvider } from '@mui/material/styles';
+import Container from '@mui/material/Container';
+import TextField from '@mui/material/TextField';
+import Button from '@mui/material/Button';
+import CssBaseline from '@mui/material/CssBaseline';
+
 import RepositoriesTable from './components/repositories/RepositoriesTable';
-import CommitsTable from './components/repositories/CommitsTable';
+import CommitsTable from './components/commits/CommitsTable';
 
 function App() {
-  const BASE_GITHUB_URL = 'https://api.github.com/';
+  const BASE_GITHUB_URL = 'https://api.github.com';
   const [repositories, setRepositories] = useState([]);
   const [commits, setCommits] = useState([]);
   const [userName, setUserName] = useState('');
+  const darkTheme = createTheme({
+    palette: {
+      mode: 'dark',
+    },
+  });
 
   function handleSearchClicked() {
     getRepositories(userName);
@@ -59,33 +69,38 @@ function App() {
       });
   }
 
-  return (
-    <div className="App">
-      <InputLabel>
-        Name:
-        <TextInput name="name" value={userName} onChange={(e) => setUserName(e.target.value)}/>
-      </InputLabel>
-      <button onClick={() => handleSearchClicked()}>Search for user</button>
+  return (  
+    <Container fixed>
+      <ThemeProvider theme={darkTheme}>
+        <CssBaseline />
 
-      { (repositories.length > 0) ? <RepositoriesTable repositories={repositories} onRepositoryClick={handleRepositoryClick}/> : '' }
-      { (commits.length > 0) ? <CommitsTable commits={commits}/> : '' }
+        <SearchWrapper>
+          <TextField
+            id="standard-basic"
+            label="Name"
+            value={userName}
+            onChange={(e) => setUserName(e.target.value)}/>
+          <InputButton
+            variant="contained"
+            onClick={() => handleSearchClicked()}>
+              Search for user
+          </InputButton>
+        </SearchWrapper>
 
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+        { (repositories.length > 0) ? <RepositoriesTable repositories={repositories} onRepositoryClick={handleRepositoryClick}/> : '' }
+        { (commits.length > 0) ? <CommitsTable commits={commits}/> : '' }
+      </ThemeProvider>
+    </Container>
   );
 }
 
 export default App;
+
+const SearchWrapper = styled.div`
+  margin: 20px;
+  text-align: center;
+`;
+
+const InputButton = styled(Button)`
+  height: 56px;
+`;

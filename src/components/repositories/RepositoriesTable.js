@@ -1,55 +1,57 @@
 import React from "react";
-import styled from 'styled-components';
 
-import Table from "../Table";
-import TableHeader from "../TableHeader";
-import TableBody from "../TableBody";
-import TableRow from "../TableRow";
+import Table from '@mui/material/Table';
+import TableBody from '@mui/material/TableBody';
+import TableCell from '@mui/material/TableCell';
+import TableContainer from '@mui/material/TableContainer';
+import TableHead from '@mui/material/TableHead';
+import TableRow from '@mui/material/TableRow';
+import Paper from '@mui/material/Paper';
 
 function RepositoriesTable({ repositories, onRepositoryClick }) {
 
   function renderRepositories() {
     return repositories.map(repo => {
-      return (<TableRow key={`repo-${repo.id}`}>
-        <td>
-          <span onClick={() => onRepositoryClick()}>{repo.name}</span>
-        </td>
-        <td>{repo.language}</td>
-        <td>{repo.description}</td>
-        <td>{repo.created_at}</td>
-        <td>{repo.updated_at}</td>
-        <td><a href={repo.html_url}>{repo.html_url}</a></td>
-        <td>
-          <S.ButtonWrapper>
-          </S.ButtonWrapper>
-        </td>
-      </TableRow>) 
+
+      return (
+        <TableRow
+          key={`repository-` + repo.name}
+          sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
+        >
+          <TableCell>
+            <span onClick={() => onRepositoryClick(repo.name)}>{repo.name}</span>
+          </TableCell>
+          <TableCell>{repo.language}</TableCell>
+          <TableCell>{repo.description}</TableCell>
+          <TableCell>{repo.created_at}</TableCell>
+          <TableCell>{repo.updated_at}</TableCell>
+          <TableCell>
+            <a href={repo.html_url}>{repo.html_url}</a>
+          </TableCell>
+        </TableRow>) 
     });
   }
 
   return (
-    <Table>
-      <TableHeader>
-        <tr>
-          <td>Name</td>
-          <td>Language</td>
-          <td>Description</td>
-          <td>Created At</td>
-          <td>Updated At</td>
-          <td>Link</td>
-          <td></td>
-        </tr>
-      </TableHeader>
-      <TableBody>
-        { renderRepositories() }
-      </TableBody>
-    </Table>
+    <TableContainer component={Paper}>
+      <Table sx={{ minWidth: 1050 }} aria-label="simple table">
+        <TableHead>
+          <TableRow>
+            <TableCell>Name</TableCell>
+            <TableCell>Language</TableCell>
+            <TableCell>Description</TableCell>
+            <TableCell>Created At</TableCell>
+            <TableCell>Updated At</TableCell>
+            <TableCell>Link</TableCell>
+            <TableCell></TableCell>
+          </TableRow>
+        </TableHead>
+        <TableBody>
+          { renderRepositories() }
+        </TableBody>
+      </Table>
+    </TableContainer>
   );
 }
 
 export default RepositoriesTable;
-
-const S = {};
-S.ButtonWrapper = styled.div`
-  display: inline-block;
-`
