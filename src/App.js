@@ -1,5 +1,5 @@
 import './App.css';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import styled from 'styled-components';
 
 import { createTheme, ThemeProvider } from '@mui/material/styles';
@@ -15,12 +15,17 @@ function App() {
   const BASE_GITHUB_URL = 'https://api.github.com';
   const [repositories, setRepositories] = useState([]);
   const [commits, setCommits] = useState([]);
+  const [showCommits, setShowCommits] = useState(false);
   const [userName, setUserName] = useState('');
   const darkTheme = createTheme({
     palette: {
       mode: 'dark',
     },
   });
+
+  useEffect(() => {
+    setShowCommits(commits.length > 0);
+  }, [commits]);
 
   function handleSearchClicked() {
     getRepositories(userName);
@@ -86,9 +91,12 @@ function App() {
               Search for user
           </InputButton>
         </SearchWrapper>
-
-        { (repositories.length > 0) ? <RepositoriesTable repositories={repositories} onRepositoryClick={handleRepositoryClick}/> : '' }
-        { (commits.length > 0) ? <CommitsTable commits={commits}/> : '' }
+        {(showCommits) ? 
+          <CommitsTable commits={commits}/> :
+          <RepositoriesTable
+            repositories={repositories}
+            onRepositoryClick={handleRepositoryClick}/>
+        }
       </ThemeProvider>
     </Container>
   );

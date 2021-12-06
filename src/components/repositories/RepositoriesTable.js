@@ -11,6 +11,8 @@ import Paper from '@mui/material/Paper';
 function RepositoriesTable({ repositories, onRepositoryClick }) {
 
   function renderRepositories() {
+    if (!repositories.length > 0) { return '' };
+
     return repositories.map(repo => {
 
       return (
