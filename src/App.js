@@ -1,5 +1,5 @@
 import './App.css';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import styled from 'styled-components';
 
 import { createTheme, ThemeProvider } from '@mui/material/styles';
@@ -15,6 +15,7 @@ function App() {
   const BASE_GITHUB_URL = 'https://api.github.com';
   const [repositories, setRepositories] = useState([]);
   const [commits, setCommits] = useState([]);
+  const [showCommits, setShowCommits] = useState(false);
   const [userName, setUserName] = useState('');
   const darkTheme = createTheme({
     palette: {
@@ -22,7 +23,12 @@ function App() {
     },
   });
 
+  useEffect(() => {
+    setShowCommits(commits.length > 0);
+  }, [commits]);
+
   function handleSearchClicked() {
+    setShowCommits(false);
     getRepositories(userName);
   }
 
@@ -37,8 +43,6 @@ function App() {
     })
       .then(response => response.json())
       .then(repositories => {
-        //TODO Figure out what the response is like
-        // https://api.github.com/users/Ongewitter/repos
         setRepositories(repositories);
       })
       .catch((error) => {
@@ -60,8 +64,6 @@ function App() {
     })
       .then(response => response.json())
       .then(commits => {
-        //TODO Figure out what the response is like
-        // https://api.github.com/users/Ongewitter/repos
         setCommits(commits);
       })
       .catch((error) => {
@@ -86,9 +88,12 @@ function App() {
               Search for user
           </InputButton>
         </SearchWrapper>
-
-        { (repositories.length > 0) ? <RepositoriesTable repositories={repositories} onRepositoryClick={handleRepositoryClick}/> : '' }
-        { (commits.length > 0) ? <CommitsTable commits={commits}/> : '' }
+        {(showCommits) ? 
+          <CommitsTable commits={commits}/> :
+          <RepositoriesTable
+            repositories={repositories}
+            onRepositoryClick={handleRepositoryClick}/>
+        }
       </ThemeProvider>
     </Container>
   );
