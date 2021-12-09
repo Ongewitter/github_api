@@ -9,6 +9,7 @@ import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
 
 function CommitsTable({ commits }) {
+  if (!commits.length > 0) { return '' };
 
   function renderCommits() {
     return commits.map(commit => {

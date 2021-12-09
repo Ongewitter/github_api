@@ -1,5 +1,6 @@
 import React from "react";
 
+import Button from "@mui/material/Button";
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
@@ -9,10 +10,9 @@ import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
 
 function RepositoriesTable({ repositories, onRepositoryClick }) {
+  if (!repositories.length > 0) { return '' };
 
   function renderRepositories() {
-    if (!repositories.length > 0) { return '' };
-
     return repositories.map(repo => {
 
       return (
@@ -21,7 +21,7 @@ function RepositoriesTable({ repositories, onRepositoryClick }) {
           sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
         >
           <TableCell>
-            <span onClick={() => onRepositoryClick(repo.name)}>{repo.name}</span>
+            <Button onClick={() => onRepositoryClick(repo.name)}>{repo.name}</Button>
           </TableCell>
           <TableCell>{repo.language}</TableCell>
           <TableCell>{repo.description}</TableCell>
