@@ -13,6 +13,8 @@ function RepositoriesTable({ repositories, onRepositoryClicked }) {
   if (repositories.length <= 0) { return '' };
 
   function renderRepositories() {
+    if (!repositories.length > 0) { return '' };
+
     return repositories.map(repo => {
 
       return (
