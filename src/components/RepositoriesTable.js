@@ -9,8 +9,8 @@ import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
 
-function RepositoriesTable({ repositories, onRepositoryClick }) {
-  if (!repositories.length > 0) { return '' };
+function RepositoriesTable({ repositories, onRepositoryClicked }) {
+  if (repositories.length <= 0) { return '' };
 
   function renderRepositories() {
     return repositories.map(repo => {
@@ -21,7 +21,7 @@ function RepositoriesTable({ repositories, onRepositoryClick }) {
           sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
         >
           <TableCell>
-            <Button onClick={() => onRepositoryClick(repo.name)}>{repo.name}</Button>
+            <Button onClick={() => onRepositoryClicked(repo.name)}>{repo.name}</Button>
           </TableCell>
           <TableCell>{repo.language}</TableCell>
           <TableCell>{repo.description}</TableCell>

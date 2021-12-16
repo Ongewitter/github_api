@@ -1,22 +1,35 @@
 import './App.css';
 import { useState, useEffect } from 'react';
+import React from 'react';
 import styled from 'styled-components';
 
 import { createTheme, ThemeProvider } from '@mui/material/styles';
-import Container from '@mui/material/Container';
-import TextField from '@mui/material/TextField';
+import Alert from '@mui/material/Alert';
 import Button from '@mui/material/Button';
+import Container from '@mui/material/Container';
 import CssBaseline from '@mui/material/CssBaseline';
+import LinearProgress from '@mui/material/LinearProgress';
+import TextField from '@mui/material/TextField';
 
-import RepositoriesTable from './components/repositories/RepositoriesTable';
-import CommitsTable from './components/commits/CommitsTable';
+import usePageBottom from './utils/usePageBottom';
+import fetchGet from './utils/fetchData';
+import RepositoriesTable from './components/RepositoriesTable';
+import CommitsTable from './components/CommitsTable';
 
 function App() {
   const BASE_GITHUB_URL = 'https://api.github.com';
   const [repositories, setRepositories] = useState([]);
+  const [repositoryName, setRepositoryName] = useState('');
   const [commits, setCommits] = useState([]);
   const [showCommits, setShowCommits] = useState(false);
+  const [filteredCommits, setFilteredCommits] = useState([]);
+  const [commitFilter, setCommitFilter] = useState('');
+  const [commitPage, setCommitPage] = useState(1);
   const [userName, setUserName] = useState('');
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  const isPageBottom = usePageBottom();
   const darkTheme = createTheme({
     palette: {
       mode: 'dark',
@@ -27,73 +40,127 @@ function App() {
     setShowCommits(commits.length > 0);
   }, [commits]);
 
+  useEffect(() => {
+    if (!showCommits) { return; }
+
+    const debounceFilterCommits = setTimeout(() => filterCommits(), 500);
+    return () => clearTimeout(debounceFilterCommits);
+  }, [commitFilter]);
+
+  function filterCommits() {
+    if (commits.length <= 0) { return; }
+    if (commitFilter.length <= 0) { return setFilteredCommits(commits); }
+
+    const filteredCommits = commits.filter((commit) => {
+      return commit.sha.includes(commitFilter) ||
+             commit.commit.author.name.includes(commitFilter) ||
+             commit.commit.author.date.includes(commitFilter) ||
+             commit.commit.message.includes(commitFilter);
+    });
+    setFilteredCommits(filteredCommits);
+  }
+
+  useEffect(() => {
+    if (!repositoryName || commitPage > 2) { return; }
+    if(!isPageBottom && commitPage !== 1) { return; }
+
+    getCommits();
+  }, [isPageBottom, repositoryName]);
+
   function handleSearchClicked() {
     setShowCommits(false);
-    getRepositories(userName);
+    getRepositories();
   }
 
-  function getRepositories(userName) {
-    //TODO: Make this a generic fetch method
-    //TODO: Look into mocking this so github doesn't complain
-    fetch(`${BASE_GITHUB_URL}/users/${userName}/repos`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    })
-      .then(response => response.json())
-      .then(repositories => {
-        setRepositories(repositories);
-      })
-      .catch((error) => {
-        console.error('Error:', error);
-      });
+  async function getRepositories() {
+    setLoading(true);
+    await fetchGet({
+      url: `${BASE_GITHUB_URL}/users/${userName}/repos`,
+      success: setRepositories,
+      error: setError
+    }).then(() => {
+      resetDefaultValues();
+    });
   }
 
-  function handleRepositoryClick(repositoryName) {
-    getCommits(userName, repositoryName);
+  async function getCommits() {
+    console.log(repositoryName, userName);
+    setLoading(true);
+    await fetchGet({
+      url: `${BASE_GITHUB_URL}/repos/${userName}/${repositoryName}/commits?page=${commitPage}&per_page=20`,
+      success: (response) => { setCommits(commits.concat(response)) },
+      fail: setError
+    }).then(() => {
+      setLoading(false);
+      setCommitFilter('');
+      setCommitPage(commitPage + 1);
+    });
   }
 
-  function getCommits(userName, repositoryName) {
-    //TODO: Look into mocking this so github doesn't complain
-    fetch(`${BASE_GITHUB_URL}/repos/${userName}/${repositoryName}/commits`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    })
-      .then(response => response.json())
-      .then(commits => {
-        setCommits(commits);
-      })
-      .catch((error) => {
-        console.error('Error:', error);
-      });
+  function handleRepositoryClicked(repositoryName) {
+    setRepositoryName(repositoryName);
   }
 
-  return (  
+  function handleBack() {
+    if (showCommits) {
+      resetDefaultValues();
+    }
+  }
+
+  function resetDefaultValues() {
+    setLoading(false)
+    setCommitPage(1);
+    setCommits([]);
+    setCommitFilter('');
+  }
+
+  function renderTable() {
+    if (showCommits) {
+      return (
+        <React.Fragment>
+          <SearchWrapper>
+            <BiggerButton 
+              variant="contained"
+              onClick={() => handleBack()}>
+                Back
+            </BiggerButton>
+            <TextField
+              id="standard-basic"
+              label="Filter Commits"
+              value={commitFilter}
+              onChange={(e) => setCommitFilter(e.target.value)}/>
+          </SearchWrapper>
+          <CommitsTable commits={filteredCommits}/>
+        </React.Fragment>
+      );
+    } else {
+      return (<RepositoriesTable
+                repositories={repositories}
+                onRepositoryClicked={handleRepositoryClicked}/>);
+    }
+  }
+
+  return (
     <Container fixed>
       <ThemeProvider theme={darkTheme}>
         <CssBaseline />
 
+        { (error) ? (<Alert severity="error">error.message</Alert>) : '' }
         <SearchWrapper>
           <TextField
             id="standard-basic"
             label="Name"
             value={userName}
             onChange={(e) => setUserName(e.target.value)}/>
-          <InputButton
+          <BiggerButton
             variant="contained"
+            disabled={loading}
             onClick={() => handleSearchClicked()}>
               Search for user
-          </InputButton>
+          </BiggerButton>
         </SearchWrapper>
-        {(showCommits) ? 
-          <CommitsTable commits={commits}/> :
-          <RepositoriesTable
-            repositories={repositories}
-            onRepositoryClick={handleRepositoryClick}/>
-        }
+        { (loading) ? <LinearProgress /> : '' }
+        {renderTable()}
       </ThemeProvider>
     </Container>
   );
@@ -106,6 +173,6 @@ const SearchWrapper = styled.div`
   text-align: center;
 `;
 
-const InputButton = styled(Button)`
+const BiggerButton = styled(Button)`
   height: 56px;
 `;
