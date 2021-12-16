@@ -82,9 +82,12 @@ function App() {
       resetDefaultValues();
     });
   }
-
+  
+  function handleRepositoryClicked(repositoryName) {
+    setRepositoryName(repositoryName);
+  }
+  
   async function getCommits() {
-    console.log(repositoryName, userName);
     setLoading(true);
     await fetchGet({
       url: `${BASE_GITHUB_URL}/repos/${userName}/${repositoryName}/commits?page=${commitPage}&per_page=20`,
@@ -97,10 +100,6 @@ function App() {
     });
   }
 
-  function handleRepositoryClicked(repositoryName) {
-    setRepositoryName(repositoryName);
-  }
-
   function handleBack() {
     if (showCommits) {
       resetDefaultValues();
@@ -111,7 +110,9 @@ function App() {
     setLoading(false)
     setCommitPage(1);
     setCommits([]);
+    setShowCommits(false);
     setCommitFilter('');
+    setRepositoryName('');
   }
 
   function renderTable() {
